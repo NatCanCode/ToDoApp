@@ -29,13 +29,39 @@ extension Priority {
     }
 }
 
+func foregroundColor(_ status: String) -> Color {
+    switch status {
+    case "Low":
+        return Color.green
+    case "Medium":
+        return Color.orange
+    case "High":
+        return Color.red
+    default:
+        return Color.clear
+    }
+}
+//private func styleForPriority(_ value: String) -> Color {
+//    let priority = Priority(rawValue: value)
+//    switch priority {
+//    case .low:
+//        return Color.green
+//    case .medium:
+//        return Color.orange
+//    case .high:
+//        return Color.red
+//    default:
+//        return Color.black
+//    }
+//}
+
 struct AddTaskView: View {
     
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) var dismiss
     
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Item.dueDate, ascending: true)],
         animation: .default
     )
     private var items: FetchedResults<Item>
@@ -44,10 +70,10 @@ struct AddTaskView: View {
     @State var selectedPriority: Priority = .medium
     
     init() {
-        //Use this if NavigationBarTitle is with Large Font
-        UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: UIColor.purple]
-        //        Use this if NavigationBarTitle is with displayMode = .inline
-        //        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor.white]
+        // How to change selected segment color in SwiftUI Segmented Picker
+        UISegmentedControl.appearance().selectedSegmentTintColor = .purple
+        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
+        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.purple], for: .normal)
     }
     
     var body: some View {
@@ -56,12 +82,11 @@ struct AddTaskView: View {
                 Form {
                     Section {
                         TextField("Task", text: $title)
-//                            .textFieldStyle(.roundedBorder)
+                        //                            .textFieldStyle(.roundedBorder)
                     } header: {
-                        Text("Detail task")
+                        Text("Enter task")
                             .foregroundColor(.accentColor)
                     }
-                    
                     Section {
                         Picker("Priority", selection: $selectedPriority) {
                             ForEach(Priority.allCases) { priority in
@@ -69,37 +94,38 @@ struct AddTaskView: View {
                             }
                         }
                         .pickerStyle(.segmented)
-                        .colorMultiply(.accentColor)
+//                        .colorMultiply(.accentColor)
+//                        .onChange(of: selectedPriority) { _ in }
                     } header: {
                         Text("Priority")
                             .foregroundColor(.accentColor)
                     }
-                    
-                    Spacer()
-                    Spacer()
-                    
+                }
+                Button {
+                    //                        addItem()
+                    saveTask()
+                    dismiss()
+                } label: {
+                    Text("Save")
+                        .frame(minWidth: 0, maxWidth: .infinity)
+                }
+            }
+            .toolbar {
+                ToolbarItem {
                     Button {
-                        saveTask()
-//                        addItem()
                         dismiss()
                     } label: {
-                        Text("Save")
-                            .frame(minWidth: 0, maxWidth: .infinity)
+                        Text("Cancel")
                     }
                 }
-                .toolbar {
-                    ToolbarItem {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Text("Cancel")
-                        }
-                    }
-                }
-                .navigationTitle("Add a task")
-                //                .navigationBarTitleDisplayMode(.inline)
-                .scrollContentBackground(.hidden)
             }
+            .navigationTitle("Add a task")
+            .scrollContentBackground(.hidden)
+            .scrollContentBackground(.hidden)
+            //                .background(Image("")
+            //                    .resizable()
+            //                    .scaledToFill()
+            //                    .ignoresSafeArea())
         }
     }
     
@@ -116,22 +142,52 @@ struct AddTaskView: View {
         }
     }
     
-//    private func addItem() {
-//        withAnimation {
-//            let newItem = Item(context: viewContext)
-//            newItem.timestamp = Date()
-//            newItem.order = (items.last?.order ?? 0) + 1
-//
-//            do {
-//                try viewContext.save()
-//            } catch {
-//                // Replace this implementation with code to handle the error appropriately.
-//                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-//                let nsError = error as NSError
-//                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-//            }
-//        }
-//    }
+    private func styleForPriority(_ value: String) -> Color {
+        let priority = Priority(rawValue: value)
+        switch priority {
+        case .low:
+            return Color.green
+        case .medium:
+            return Color.orange
+        case .high:
+            return Color.red
+        default:
+            return Color.black
+        }
+    }
+    
+    //    let objectColors = SegmentColor.allCases
+    //    @State private var selectedColor = SegmentColor.red
+    //
+    //    enum SegmentColor: String, CaseIterable, Identifiable {
+    //        case red, yellow, green
+    //        var id: String { rawValue }
+    //
+    //        var color: UIColor {
+    //            switch self {
+    //            case .red:      return .red
+    //            case .yellow:   return .yellow
+    //            case .green:    return .green
+    //            }
+    //        }
+    //    }
+    
+    //    private func addItem() {
+    //        withAnimation {
+    //            let newItem = Item(context: viewContext)
+    //            newItem.timestamp = Date()
+    //            newItem.order = (items.last?.order ?? 0) + 1
+    //
+    //            do {
+    //                try viewContext.save()
+    //            } catch {
+    //                // Replace this implementation with code to handle the error appropriately.
+    //                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+    //                let nsError = error as NSError
+    //                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+    //            }
+    //        }
+    //    }
 }
 
 struct AddTaskView_Previews: PreviewProvider {
